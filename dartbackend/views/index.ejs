@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <meta charset="utf-8" />
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link data-require="bootstrap@*" data-semver="3.2.0" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" />
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" />
+    <!-- include SockJS -->
+     <script src="http://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+    <!-- include the client library -->    
+    <script src="lib/stomp.js"></script>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+
+    <ng-view></ng-view>
+
+    <!-- Libraries -->
+    <script src="https://code.angularjs.org/1.6.4/angular.min.js"></script>
+    <script src="https://code.angularjs.org/1.6.4/angular-route.min.js"></script>
+    <script src="https://code.angularjs.org/1.6.4/angular-resource.min.js"></script>
+
+    <link data-require="chosen@*" data-semver="1.0.0" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.min.css" />
+    <script data-require="jquery@*" data-semver="2.2.0" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script data-require="chosen@*" data-semver="1.0.0" src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.jquery.min.js"></script>
+    <script data-require="chosen@*" data-semver="1.0.0" src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.proto.min.js"></script>
+    
+    <script src="https://rawgit.com/leocaseiro/angular-chosen/master/dist/angular-chosen.min.js"></script>
+    <style>select {width: 400px;}</style>
+
+    <!-- Template -->
+    <script type="text/ng-template" id="/players.html">
+      <div ng-controller="LightController" ng-init="init()">
+        <div>
+          Light
+          <i class="fa fa-toggle-on active" ng-if="status == true" ng-click="changeStatus();"></i>
+          <i class="fa fa-toggle-on fa-rotate-180 inactive" ng-if="status == false" ng-click="changeStatus();"></i>
+        </div>
+      </div>
+      <br>
+      Search: <input type="text" ng-model="search.name">
+      <ul>
+        <li ng-repeat="player in players | filter: search">
+          <a ng-show="!editing[$index]" href="#!/player/{{player._id}}">{{player.name}}</a>
+          <button ng-show="!editing[$index]" ng-click="edit($index)">edit</button>
+
+          <input ng-show="editing[$index]" type="text" ng-model="player.name">
+          <button ng-show="editing[$index]" ng-click="update($index)">Update</button>
+          <button ng-show="editing[$index]" ng-click="cancel($index)">Cancel</button>
+          <button ng-show="!editing[$index]" ng-click="remove($index)">remove</button>
+        </li>
+      </ul>
+      New Player <input type="text" ng-model="newPlayer"><button ng-click="save()">Create</button><br><br>
+      <button ng-show="editing.length < 1" ng-click="newgame()">New Game</button>
+    </script>
+
+    <script type="text/ng-template" id="/playerDetails.html">
+      <h1>{{ player.name }}</h1>
+      average: <textarea ng-model="player.average"></textarea><br>
+      wins: <textarea ng-model="player.wins"></textarea><br><br>
+
+      <button ng-click="update()">Update</button>
+      <button ng-click="remove()">Remove</button>
+      <a href="/">Cancel</a>
+    </script>
+
+    <script type="text/ng-template" id="/newGame.html">
+      <h1>New Game</h1>
+      <label for="players">Select Players: </label>
+      <select multiple
+              /*chosen*/
+              placeholder_text_multiple="'Select Players'"
+              no_results_text="'Could not find any players :('"
+              ng-model="game.players"
+              ng-options="player._id as player.name for player in players">
+      </select><br><br>
+      <lable>Points:
+        <select ng-model="game.gamepoints" convert-to-number>
+          <option value="301">301</option>
+          <option value="501">501</option>
+          <option value="701">701</option>
+        </select>
+      </lable><br><br>
+      <lable>Double in:
+        <input type="checkbox" ng-model="game.doublein">
+      </lable><br><br>
+      <lable>Double out:
+        <input type="checkbox" ng-model="game.doubleout">
+      </lable><br><br>
+      <lable>Elimination:
+        <input type="checkbox" ng-model="game.elimination">
+      </lable><br><br>
+      <button ng-click="create()">Create</button><br><br>
+      <a href="/">Cancel</a>
+    </script>
+
+    <script type="text/ng-template" id="/game.html">
+      <h1>Game</h1>
+      <audio id="win">
+          <source src="sounds/Siegermelodie.ogg" type="audio/ogg">
+          <source src="sounds/Siegermelodie.mp3" type="audio/mpeg"> 
+      </audio>
+      <table class="table" show-filter="true">
+        <tr ng-repeat="player in players">
+          <td title="'Name'" filter="{ name: 'text'}" sortable="'name'">
+            {{player.name}}</td>
+          <td title="'Points'" filter="{ points: 'number'}" sortable="'points'">
+            {{player.points}}</td>
+          <td ng-if="player.turn ""title="'Turn'" filter="{ turn: 'boolean'}" sortable="'turn'">
+            &larr;</td>
+          <td ng-repeat="score in player.round" "title="'Score'" filter="{ value: 'number'}" sortable="'value'">
+            {{score.value}}</td>
+        </tr>
+      </table>
+      <button ng-click="cancle()">Abandon</button>
+    </script>
+
+
+    <script>
+      angular.module('app', ['ngRoute', 'ngResource', 'localytics.directives'])
+        //---------------
+        // Services
+        //---------------
+        .factory('Players', ['$resource', function($resource){
+          return $resource('/players/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+        .factory('Game', ['$resource', function($resource){
+          return $resource('/game', null, {
+            'getPlayers': {method:'GET', isArray:true, url:'/game/players'}
+          });
+        }])
+        .factory('Command', ['$resource', function($resource){
+          return $resource('/command', null);
+        }])
+        //---------------
+        // Controllers
+        //---------------
+        .controller('LightController', ['$scope', 'Command', function($scope, Command) {
+          $scope.init = function(){
+            $scope.status = false;
+          }
+          $scope.changeStatus = function(){
+            $scope.status = !$scope.status;
+            Command.get({switch: $scope.status})
+          }
+        }])
+        .controller('PlayerController', ['$scope', 'Players', '$location', function ($scope, Players, $location) {
+          $scope.editing = [];
+          $scope.players = Players.query();
+          $scope.save = function(){
+            if(!$scope.newPlayer || $scope.newPlayer.length < 1) return;
+            var player = new Players({ name: $scope.newPlayer });
+            player.$save(function(){
+              $scope.players.push(player);
+              $scope.newPlayer = ''; // clear textbox
+            });
+          }
+          $scope.update = function(index){
+            var player = $scope.players[index];
+            Players.update({id: player._id}, player);
+            $scope.editing = [];
+          }
+          $scope.edit = function(index){
+            $scope.editing[index] = angular.copy($scope.players[index]);
+          }
+          $scope.cancel = function(index){
+            $scope.players[index] = angular.copy($scope.editing[index]);
+            $scope.editing = [];
+          }
+          $scope.remove = function(index){
+            var player = $scope.players[index];
+            Players.remove({id: player._id}, function(){
+              $scope.players.splice(index, 1);
+            });
+          }
+          $scope.newgame = function(){
+            $location.url('/newGame');
+          }
+        }])
+        .controller('PlayerDetailCtrl', ['$scope', '$routeParams', 'Players', '$location', function ($scope, $routeParams, Players, $location) {
+          $scope.player = Players.get({id: $routeParams.id });
+          $scope.remove = function(){
+            Players.remove({id: $scope.player._id}, function(){
+              $location.url('/');
+            });
+          }
+          $scope.update = function(){
+            Players.update({id: $scope.player._id}, $scope.player, function(){
+              $location.url('/');
+            });
+          }
+        }])
+        .controller('NewGameController', ['$scope', 'Players', 'Game', 'Command', '$location', function ($scope, Players, Game, Command, $location) {
+          $scope.players = Players.query();
+          $scope.game = {
+            gamepoints : 501,
+            doublein  : false,
+            doubleout : true,
+            elimination: false
+          };
+          $scope.create = function(){
+            Command.get({game: true})
+            Game.delete();
+            for (var index = 0; index < $scope.game.players.length; index++){
+              Players.update({id: $scope.game.players[index]}, {points: $scope.game.gamepoints});
+            }
+            var game = new Game({ gamepoints: $scope.game.gamepoints, doublein: $scope.game.doublein, doubleout: $scope.game.doubleout, elimination: $scope.game.elimination, players : $scope.game.players });
+            game.$save(function(){
+              $location.url('/game');
+            });
+          }
+        }])
+        .controller('GameController', ['$scope', 'Players', 'Game', 'Command', '$location', function ($scope, Players, Game, Command, $location) {
+          $scope.players = Game.getPlayers();
+          if (location.search == '?ws') {
+            var ws = new WebSocket('ws://' + window.location.hostname + ':15674/ws');
+          } else {
+            var ws = new SockJS('http://' + window.location.hostname + ':15674/stomp');
+          }
+          var client = Stomp.over(ws);
+          var on_connect = function() {
+            console.log('connected');
+            id = client.subscribe("/topic/score", function(d) {
+               p = d.body
+               p = (p === undefined) ? '' : JSON.parse(p);
+               $scope.players.splice(0,$scope.players.length)
+               $scope.players = p;
+               $scope.$apply()
+               for(i=0; i < p.length; i++) {
+                 if (p[i].points == 0) {
+                   document.getElementById('win').play();
+                 }
+               }
+            });
+          };
+          var on_error =  function() {
+            console.log('error');
+          };
+          client.connect('guest', 'guest', on_connect, on_error, '/');
+          $scope.cancle = function(){
+            client.disconnect();
+            Game.delete();
+            for (var index = 0; index < $scope.players.length; index++){
+              Players.update({id: $scope.players[index]._id}, {points: 0, turn: false});
+            }
+            $location.url('/');
+            Command.get({game: false});
+          }
+
+        }])
+        //---------------
+        // Routes
+        //---------------
+        .config(['$routeProvider', function ($routeProvider) {
+          $routeProvider
+            .when('/', {
+              templateUrl: '/players.html',
+              controller: 'PlayerController'
+            })
+            .when('/player/:id', {
+              templateUrl: '/playerDetails.html',
+              controller: 'PlayerDetailCtrl'
+            })
+            .when('/newGame', {
+              templateUrl: '/newGame.html',
+              controller: 'NewGameController'
+            })
+            .when('/game', {
+              templateUrl: '/game.html',
+              controller: 'GameController'
+           });
+        }]);
+    </script>
+  </body>
+</html>

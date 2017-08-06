@@ -1,0 +1,13 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+.active, .inactive {font-size:40px;cursor:pointer;}
+.active, .inactive {font-size:40px;cursor:pointer;}
+i.active { color: #5cb85c}
+i.inactive {color: #d9534f}
