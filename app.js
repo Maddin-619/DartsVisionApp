@@ -16,7 +16,7 @@ var game_logic = require('./game_logic/game_logic');
 var app = express();
 
 var spawn = require('child_process').spawn,
-    py    = spawn('python', ['DartVison.py']);
+    py    = spawn('python', ['DartVision/DartVison.py']);
 
 mongoose.Promise = global.Promise;
 
