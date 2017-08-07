@@ -10,11 +10,13 @@ DartsVisionApp is a web application based on the MEAN stack. It is the user inte
 
 ## Requirements
 ### Hardware
+
 * Raspberry Pi (3)
 * Raspberry Pi camera
 * [Raspberry case](https://www.rasppishop.de/Nwazet-Pi-Kamera-Gehaeuse-inkl-Linse-und-Wandhalterung-fuer-Raspberry)
 * 2 x Dart Board (lights to avoid shadows sometihing like [that](https://www.cht-cottbus.de/philips-linear-led-deckenleuchte-850863116-800lm-weiss.htm?gclid=Cj0KCQjwn6DMBRC0ARIsAHZtCePsOh2S4pL3mSAbM0IRDXYz1-5qu3X60cCUfqp1aZKlXWfRga2CGb0aAgnGEALw_wcB))
 * [Relais for Dart Board lights](https://www.amazon.de/gp/product/B00ALNJN72/ref=oh_aui_detailpage_o05_s00?ie=UTF8&psc=1) (install instructions [here](https://www.amazon.de/gp/customer-reviews/R2335YTB9VL42P/ref=cm_cr_getr_d_rvw_ttl?ie=UTF8&ASIN=B00ALNJN72))
+
 ### Software
 
 * Linux OS on the Raspberry Pi (Debian, Ubuntu, ...)
@@ -23,7 +25,6 @@ DartsVisionApp is a web application based on the MEAN stack. It is the user inte
 * NodeJS
 * Mongodb
 * RabbitMQ
-
 
 ## Install
 1. Set up Raspberry Pi with OS and connect it to your local network.
