@@ -21,7 +21,9 @@ var spawn = require('child_process').spawn,
 mongoose.Promise = global.Promise;
 
 // connect to MongoDB
-mongoose.connect('mongodb://martin-desktop/dartbackend')
+mongoose.connect('mongodb://martin-desktop/dartbackend', {
+    useMongoClient: true
+})
   .then(() =>  console.log('connection to MongoDB succesful'))
   .catch((err) => console.error(err));
 
