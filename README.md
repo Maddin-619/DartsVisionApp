@@ -1,6 +1,6 @@
 # DartsVisionApp
 
-This app serves to digitize the steel darts sport. You get the advantages from the e-darts with the steel darts. The app is based on the fact that the darts are recognized by a camera and the points are evaluated automatically. This eliminates the annoying calculation and note the points.\
+This app serves to digitize the steel darts sport. You get the advantages from the e-darts with the steel darts. The app is based on the fact that the darts are recognized by a camera and the points are evaluated automatically. This eliminates the annoying calculation and note the points.<br />
 The system hardware is a raspberry pi with a raspberry pi camera. This is located above the dartboard on the ceiling. This software is designed for such a system.
 
 ## Description
