@@ -1,3 +1,4 @@
+var os = require('os');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -18,18 +19,19 @@ var app = express();
 var spawn = require('child_process').spawn,
     py    = spawn('python', ['DartVision/DartVison.py']);
 
+var hostname = 'martin-desktop';//os.hostname;
+
 mongoose.Promise = global.Promise;
 
 // connect to MongoDB
-mongoose.connect('mongodb://martin-desktop/dartbackend', {
+mongoose.connect('mongodb://' + hostname +'/dartbackend', {
     useMongoClient: true
 })
   .then(() =>  console.log('connection to MongoDB succesful'))
   .catch((err) => console.error(err));
 
 // connect to RabbitAMQP Server
-
-amqp.connect('amqp://martin-desktop:5672', function(err, connection) {
+amqp.connect('amqp://' + hostname +':5672', function(err, connection) {
     console.log('connection to RabbitAMQP succesful')
     connection.createChannel(function(err, channel) {
         channel.assertQueue('task',{durable: false});

@@ -7,8 +7,11 @@ var Player = require('../models/Player.js');
 
 var index = 0;
 var dart = 0;
+var roundInitPoints = 0;
+var lock = false;
 
 function nextPlayer(players) {
+  lock = false;
   if (index == players.length - 1) {
     index = 0;
   } else {
@@ -62,8 +65,10 @@ module.exports = function() {
             });
             global.channel.publish('amq.topic', 'score', new Buffer(JSON.stringify(players)));
             dart = 0;
-          } else {
-
+          } else if (!lock){
+            if(dart == 0) {
+              roundInitPoints = players[index].points;
+            }
             players[index].round[dart] = {value: points.value, multi: points.multi};
 
             if (players[index].points == game.gamepoints) {
@@ -84,6 +89,9 @@ module.exports = function() {
               } else if (game.doubleout == false) {
                 players[index].points -= points.value;
               }
+            } else if (players[index].points - points.value < 0) {
+              players[index].points = roundInitPoints;
+              lock = true;
             }
             
             if(game.elimination == true) {
