@@ -23,7 +23,7 @@ class CustomTimer(threading.Timer):
         super(CustomTimer, self).join()
         return self.result
 
-class Feld:
+class Field:
 
     def __init__(self, contour, x, y):
         self.contour = contour
@@ -107,7 +107,7 @@ def GetField(image):
             M = cv2.moments(hull)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-            black_contours.append(Feld(hull, cx, cy))
+            black_contours.append(Field(hull, cx, cy))
         i = i + 1
     cv2.imwrite('TestROIMask.png',roi_mask)
     
@@ -152,12 +152,12 @@ def GetField(image):
                 M = cv2.moments(hull)
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
-                green_contours.append(Feld(hull, cx, cy))
+                green_contours.append(Field(hull, cx, cy))
             else:
                 M = cv2.moments(hull)
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
-                green_contours.append(Feld(hull, cx, cy))
+                green_contours.append(Field(hull, cx, cy))
         i = i + 1
     green_contours[tempindex].innerContour = tempContour
     
@@ -171,7 +171,7 @@ def GetField(image):
             M = cv2.moments(hull)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-            red_contours.append(Feld(hull, cx, cy))
+            red_contours.append(Field(hull, cx, cy))
     
     # Find and draw white areas
     white_contours = []
@@ -183,11 +183,11 @@ def GetField(image):
             M = cv2.moments(hull)
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-            white_contours.append(Feld(hull, cx, cy))
+            white_contours.append(Field(hull, cx, cy))
     
-    # Calculate the Points of Feld
+    # Calculate the Points of Field
     
-    black_contours.sort(key = lambda Feld: Feld.x, reverse=False)
+    black_contours.sort(key = lambda Field: Field.x, reverse=False)
     black_contours[0].points = 20
     if(black_contours[1].y > black_contours[2].y):
         black_contours[1].points = 12
@@ -198,7 +198,7 @@ def GetField(image):
     black_contours[3].points = 20
     
     black_contours_middle = black_contours[4:8]
-    black_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    black_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     black_contours_middle[0].points = 13
     black_contours_middle[1].points = 18
     black_contours_middle[2].points = 12
@@ -220,7 +220,7 @@ def GetField(image):
         black_contours[11].points = 8
     
     black_contours_middle = black_contours[12:16]
-    black_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    black_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     black_contours_middle[0].points = 10
     black_contours_middle[1].points = 2
     black_contours_middle[2].points = 7
@@ -240,9 +240,9 @@ def GetField(image):
     for feld in black_contours:
         feld.multi = 1
     
-    white_contours.sort(key = lambda Feld: Feld.x, reverse=False)
+    white_contours.sort(key = lambda Field: Field.x, reverse=False)
     white_contours_middle = white_contours[8:12]
-    white_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    white_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     
     if(white_contours[0].y > white_contours[1].y):
         white_contours[0].points = 5
@@ -303,7 +303,7 @@ def GetField(image):
     for feld in white_contours:
         feld.multi = 1
 
-    red_contours.sort(key = lambda Feld: Feld.x, reverse=False)
+    red_contours.sort(key = lambda Field: Field.x, reverse=False)
     red_contours[0].points = 40
     red_contours[0].multi = 2
     if(red_contours[1].y > red_contours[2].y):
@@ -330,7 +330,7 @@ def GetField(image):
         red_contours[5].multi = 3
     
     red_contours_middle = red_contours[6:10]
-    red_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    red_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     red_contours_middle[0].points = 26
     red_contours_middle[0].multi = 2
     red_contours_middle[1].points = 39
@@ -389,7 +389,7 @@ def GetField(image):
     red_contours[20].points = 6
     red_contours[20].multi = 3
     
-    green_contours.sort(key = lambda Feld: Feld.x, reverse=False)
+    green_contours.sort(key = lambda Field: Field.x, reverse=False)
     
     if(green_contours[0].y > green_contours[1].y):
         green_contours[0].points = 10
@@ -403,7 +403,7 @@ def GetField(image):
         green_contours[1].multi = 2
     
     green_contours_middle = green_contours[2:6]
-    green_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    green_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     green_contours_middle[0].points = 8
     green_contours_middle[0].multi = 2
     green_contours_middle[1].points = 3
@@ -427,7 +427,7 @@ def GetField(image):
         green_contours[7].multi = 3
     
     green_contours_middle = green_contours[8:13]
-    green_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    green_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     green_contours_middle[0].points = 12
     green_contours_middle[0].multi = 2
     green_contours_middle[1].points = 18
@@ -452,7 +452,7 @@ def GetField(image):
         green_contours[14].multi = 3
     
     green_contours_middle = green_contours[15:19]
-    green_contours_middle.sort(key = lambda Feld: Feld.y, reverse=False)
+    green_contours_middle.sort(key = lambda Field: Field.y, reverse=False)
     green_contours_middle[0].points = 30
     green_contours_middle[0].multi = 2
     green_contours_middle[1].points = 51
@@ -526,8 +526,9 @@ def GetPictureStream(field_contours, channel, commandQueue):
                 dart_contours.sort(key = lambda Dart: Dart.x, reverse=False)
                 queue.put(dart_contours[0])
             # show the frame
-            dst = cv2.add(fgmask,gray)
-            #cv2.imshow("Forground", dst)
+            #dst = cv2.add(fgmask,gray)
+            dst = cv2.imread('TestImageDebug.png',cv2.IMREAD_COLOR)
+            cv2.imshow("Dart_Points", dst)
             key = cv2.waitKey(1) & 0xFF
 
             # clear the stream in preparation for the next frame
@@ -574,6 +575,11 @@ def validateDart(dart, field_contours, channel, hand):
         return False
     for item in field_contours:
             if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
+                # DEBUG: Draw dart hit point into the image
+                img = cv2.imread('TestImage.png',cv2.IMREAD_COLOR)
+                img = cv2.circle(img, (dart.x,dart.y), 2, (0,0,255), -1)
+                cv2.imwrite('TestImageDebug.png',img)
+                # DEBUG: Draw dart hit point into the image
                 print(item.points)
                 if(item.multi == 1):
                     print("Single " + str(item.points))
