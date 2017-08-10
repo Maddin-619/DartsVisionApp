@@ -576,13 +576,16 @@ def validateDart(dart, field_contours, channel, hand):
                               routing_key='points',
                               body='next')
         return False
+     # DEBUG: Draw dart hit point into the image
+    img = cv2.imread('TestImage.png',cv2.IMREAD_COLOR)
+    img = cv2.circle(img, (dart.x,dart.y), 4, (0,0,255), -1)
+    smallImage = cv2.resize(img, (640,480))
+    cv2.destroyAllWindows()
+    cv2.imshow('Hit_Point',smallImage)
+    key = cv2.waitKey(0)
+    # DEBUG: Draw dart hit point into the image
     for item in field_contours:
             if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
-                # DEBUG: Draw dart hit point into the image
-                img = cv2.imread('TestImage.png',cv2.IMREAD_COLOR)
-                img = cv2.circle(img, (dart.x,dart.y), 4, (0,0,255), -1)
-                cv2.imshow('Hit_Point',img)
-                # DEBUG: Draw dart hit point into the image
                 print(item.points)
                 if(item.multi == 1):
                     print("Single " + str(item.points))
