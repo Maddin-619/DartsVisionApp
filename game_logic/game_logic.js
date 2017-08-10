@@ -79,12 +79,22 @@ module.exports = function() {
               } else if (game.doublein == false) {
                 players[index].points -= players[index].round[dart].value;
               }
-            } else if ((players[index].points - points.value > 1) && (players[index].points - points.value  < game.gamepoints)) {
+            } else if ((players[index].points - points.value > 1) && (players[index].points < game.gamepoints)) {
               players[index].points -= points.value;
+            } else if ((players[index].points - points.value) == 1) {
+              if (game.doubleout == true) {
+                players[index].points = roundInitPoints;
+                lock = true;
+              } else if (game.doubleout == false) {
+                players[index].points -= players[index].round[dart].value;
+              }
             } else if ((players[index].points - points.value) == 0) {
               if (game.doubleout == true) {
                 if(points.multi == 2){
                   players[index].points = 0;
+                } else {
+                  players[index].points = roundInitPoints;
+                  lock = true;
                 }
               } else if (game.doubleout == false) {
                 players[index].points -= points.value;
