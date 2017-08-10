@@ -8,6 +8,7 @@ import multiprocessing
 import pika
 from multiprocessing import Process, Queue, current_process, freeze_support
 import RPi.GPIO as GPIO
+import os.path
 
 
 class CustomTimer(threading.Timer):
@@ -527,8 +528,10 @@ def GetPictureStream(field_contours, channel, commandQueue):
                 queue.put(dart_contours[0])
             # show the frame
             #dst = cv2.add(fgmask,gray)
-            dst = cv2.imread('TestImageDebug.png',cv2.IMREAD_COLOR)
-            cv2.imshow("Dart_Points", dst)
+            #if(os.path.isfile('TestImageDebug.png')):
+            #    dst = cv2.imread('TestImageDebug',cv2.IMREAD_COLOR)
+            #    if(dst != None):
+            #        cv2.imshow("Dart_Points", dst)
             key = cv2.waitKey(1) & 0xFF
 
             # clear the stream in preparation for the next frame
