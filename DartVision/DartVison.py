@@ -87,7 +87,7 @@ class DartVision:
         self.imageDartBoard = rawCapture.array
 
     def getField():
-        if(!self.imageDartBoard): return
+        if(self.imageDartBoard == None): return
         # Convert BGR to HSV
         hsv = cv2.cvtColor(self.imageDartBoard, cv2.COLOR_BGR2HSV)
 
