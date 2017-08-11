@@ -544,6 +544,7 @@ def GetPictureStream(field_contours, img, channel, commandQueue):
         queue.put('STOP')
 
 def worker(input, field_contours, img, channel):
+    cv2.namedWindow('Hit_point', cv2.WINDOW_AUTOSIZE)
     priviosDart = Dart()
     priviosDart.Time = 0
     priviosDart.x = 25000
@@ -624,7 +625,6 @@ if __name__ == '__main__':
     channel = connection.channel()
     channel.queue_declare(queue='points', durable=False)
     channel.queue_declare(queue='task', durable=False)
-    cv2.namedWindow('Hit_point', cv2.WINDOW_AUTOSIZE)
     #channel.exchange_declare(exchange='amq.topic',
     #                         type='topic',
     #                         durable = True)
