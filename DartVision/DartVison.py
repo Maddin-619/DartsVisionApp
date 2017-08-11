@@ -618,13 +618,7 @@ class DartVision:
                                            body='next')
             return False
         # DEBUG: Draw dart hit point into the image
-        cv2.destroyAllWindows()
-        test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
-        cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Hit_point', 1200,700)
-        cv2.imshow("Hit_point", test)
-        cv2.waitKey(160) & 0xFF
-        # DEBUG: Draw dart hit point into the image
+        Process(target=self.showImage, args=(dart,)).start()
         for item in self.fieldContours:
                 if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
                     print(item.points)
@@ -644,6 +638,15 @@ class DartVision:
                                             routing_key='points',
                                             body='3x' + str(item.points))
                     break
+
+    def showImage(self, dart):
+        cv2.destroyAllWindows()
+        test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
+        cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Hit_point', 1200,700)
+        cv2.imshow("Hit_point", test)
+        cv2.waitKey(200) & 0xFF
+        return
 
 if __name__ == '__main__':
     try:
