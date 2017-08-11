@@ -1,4 +1,5 @@
 # import the necessary packages
+import sys
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import numpy as np
@@ -69,25 +70,25 @@ class DartVision:
                 self.detectDarts()
         
 
-    def light(switch):
+    def light(self, switch):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(8, GPIO.OUT)
         GPIO.output(8, not switch)
 
-    def takePicture(sleeptime):
+    def takePicture(self, sleeptime):
         
         self.camera.resolution = (2592,1952)
-        rawCapture = PiRGBArray(camera)
+        rawCapture = PiRGBArray(self.camera)
 
         # allow the camera to warmup
         time.sleep(sleeptime)
 
         # grab an image from the camera
-        camera.capture(rawCapture, format="bgr")
+        self.camera.capture(rawCapture, format="bgr")
         self.imageDartBoard = rawCapture.array
 
-    def getField():
-        if(self.imageDartBoard == None): return
+    def getField(self):
+        if(not self.imageDartBoard.all): return
         # Convert BGR to HSV
         hsv = cv2.cvtColor(self.imageDartBoard, cv2.COLOR_BGR2HSV)
 
@@ -211,7 +212,7 @@ class DartVision:
                 white_contours.append(Field(hull, cx, cy))
 
         if((len(white_contours)<20) or (len(black_contours)<20) or (len(red_contours)<21) or (len(green_contours)<21)): return
-
+        print(len(green_contours))
         # Calculate the Points of Field
         black_contours.sort(key = lambda Field: Field.x, reverse=False)
         black_contours[0].points = 20
@@ -507,46 +508,48 @@ class DartVision:
         field_contours.extend(green_contours)
 
         for item in field_contours:
-            cv2.drawContours(image, [item.contour], 0, (0,255,255),1)
+            cv2.drawContours(self.imageDartBoard, [item.contour], 0, (0,255,255),1)
 
-        cv2.imwrite('TestImage.png',image)
+        cv2.imwrite('TestImage.png',self.imageDartBoard)
         self.fieldContours = field_contours
-        self.imageDebug = image
+        self.imageDebug = self.imageDartBoard
 
     def connect(self, hostname):
         # Connect to the RabbitMQ Server 
         self.amqpConnection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
-        self.amqpChannel = connection.channel()
+        self.amqpChannel = self.amqpConnection.channel()
         self.amqpChannel.queue_declare(queue='points', durable=False)
         self.amqpChannel.queue_declare(queue='task', durable=False)
+        print('connected')
 
     def disconnect(self):
         # Close the channel and the connection
         self.amqpChannel.close()
         self.amqpConnection.close()
         self.camera.close()
+        print('disconnected')
 
-    def commandListener(commandQueue, channel):
+    def commandListener(self, commandQueue, channel):
         for method_frame, properties, body in channel.consume('task'):
-        msg = bytes.decode(body)
-        print(msg)
-        commandQueue.put(msg)
-        channel.basic_ack(method_frame.delivery_tag)
+            msg = bytes.decode(body)
+            print(msg)
+            commandQueue.put(msg)
+            channel.basic_ack(method_frame.delivery_tag)
 
     def detectDarts(self):
         queue = Queue()
-        Process(target=self.worker, args=(queue)).start()
+        Process(target=self.worker, args=(queue,)).start()
         #video analyse
-        with PiCamera() as camera:
-            camera.resolution = (640, 480)
-            camera.framerate = 4
-            rawCapture = PiRGBArray(camera, size=(640, 480))
+        try:
+            self.camera.resolution = (640, 480)
+            self.camera.framerate = 4
+            rawCapture = PiRGBArray(self.camera, size=(640, 480))
             # allow the camera to warmup
             time.sleep(0.1)
             fgbg = cv2.createBackgroundSubtractorMOG2(history=20, varThreshold=40, detectShadows=0)
             kernel = np.ones((3,3),np.uint8)
             # capture frames from the camera
-            for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+            for frame in self.camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 image = frame.array
@@ -576,18 +579,20 @@ class DartVision:
                 # if the `q` key was pressed or another command gets in, break from the loop
                 if key == ord("q") or not self.commandQueue.empty():
                     break
+        except Exception as e: print(e)
+        finally:
             cv2.destroyAllWindows()
-            camera.close()
+            self.camera.close()
             queue.put('STOP')
 
-    def worker(self, input, field_contours, img, channel):
+    def worker(self, inputQueue):
         cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
         priviosDart = Dart()
         priviosDart.Time = 0
         priviosDart.x = 25000
         hand = False
         t = None
-        for dart in iter(input.get, 'STOP'):
+        for dart in iter(inputQueue.get, 'STOP'):
             if(cv2.contourArea(dart.contour)>10000):
                 hand = True
             if (dart.detectTime - priviosDart.detectTime < 0.5):
@@ -599,10 +604,10 @@ class DartVision:
                 priviosDart.Time = 0
                 priviosDart.x = 25000
             if (dart.x > priviosDart.x):
-                t = CustomTimer(0.4, validateDart, args=(priviosDart, hand))
+                t = CustomTimer(0.4, self.validateDart, args=(priviosDart, hand))
                 t.start()
             elif(dart.x <= priviosDart.x):
-                t = CustomTimer(0.4, validateDart, args=(dart, hand))
+                t = CustomTimer(0.4, self.validateDart, args=(dart, hand))
                 t.start()
             priviosDart = dart
 
@@ -616,7 +621,7 @@ class DartVision:
         # DEBUG: Draw dart hit point into the image
         test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
         cv2.imshow("Hit_point", test)
-        cv2.waitKey(0)
+        cv2.waitKey(1000000)
         cv2.destroyAllWindows()
         # DEBUG: Draw dart hit point into the image
         for item in self.fieldContours:
@@ -640,7 +645,14 @@ class DartVision:
                     break
 
 if __name__ == '__main__':
-    dartVision = DartVision()
-    dartVision.init()
-    dartVision.run()
-    dartVision.disconnect()
+    try:
+        dartVision = DartVision()
+        dartVision.init()
+        dartVision.run()
+        dartVision.disconnect()
+    except KeyboardInterrupt:
+        print('Killed by user')
+        sys.exit(0)
+    except Exception as e: print(e)
+    finally:
+        dartVision.disconnect()
