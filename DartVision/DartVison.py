@@ -623,7 +623,7 @@ class DartVision:
         cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
         cv2.resizeWindow('Hit_point', 1200,700)
         cv2.imshow("Hit_point", test)
-        cv2.waitKey(10) & 0xFF
+        cv2.waitKey(160) & 0xFF
         # DEBUG: Draw dart hit point into the image
         for item in self.fieldContours:
                 if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
