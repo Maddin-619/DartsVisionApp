@@ -8,7 +8,6 @@ import multiprocessing
 import pika
 from multiprocessing import Process, Queue, current_process, freeze_support
 import RPi.GPIO as GPIO
-import os.path
 
 
 class CustomTimer(threading.Timer):
@@ -36,19 +35,19 @@ class Dart:
     def __init__(self, contour = None, x = 0, y = 0, detectTime = 0):
         self.contour = contour
         self.x = ((x*2592)//640)
-        self.y = ((y*1944)//480)
+        self.y = ((y*1952)//480)
         self.detectTime = detectTime
 
 def TakePicture(sleeptime):
 
     # initialize the camera and grab a reference to the raw camera capture
     camera = PiCamera()
-    camera.resolution = (2592,1944)
+    camera.resolution = (2592,1952)
     rawCapture = PiRGBArray(camera)
-     
+
     # allow the camera to warmup
     time.sleep(sleeptime)
-     
+
     # grab an image from the camera
     camera.capture(rawCapture, format="bgr")
     camera.close()
@@ -66,7 +65,7 @@ def GetField(image):
     #image = final
     # Convert BGR to HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    
+
     # define range of blue color in HSV
     lower_green = np.array([35,50,50])
     upper_green = np.array([100,255,255])
@@ -94,7 +93,7 @@ def GetField(image):
     cv2.imwrite('TestBlackMask.png', black_mask)
     
     # Find and draw black areas
-    roi_mask = np.zeros((1944,2592),np.uint8)
+    roi_mask = np.zeros((1952,2592),np.uint8)
     black_contours = []
     img, contours, hierarchy = cv2.findContours(black_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
     i = 0;
@@ -491,12 +490,12 @@ def GetField(image):
     #print("Geworfene Zahl:" + str(green_contours[j].points))
     
     cv2.imwrite('TestImage.png',image)
-    
-    return field_contours
+    imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return field_contours, imageRGB
 
-def GetPictureStream(field_contours, channel, commandQueue):
+def GetPictureStream(field_contours, img, channel, commandQueue):
     queue = Queue()
-    Process(target=worker, args=(queue, field_contours, channel)).start()
+    Process(target=worker, args=(queue, field_contours, img, channel)).start()
     #video analyse
     with PiCamera() as camera:
         camera.resolution = (640, 480)
@@ -544,7 +543,7 @@ def GetPictureStream(field_contours, channel, commandQueue):
         camera.close()
         queue.put('STOP')
 
-def worker(input, field_contours, channel):
+def worker(input, field_contours, img, channel):
     priviosDart = Dart()
     priviosDart.Time = 0
     priviosDart.x = 25000
@@ -562,27 +561,25 @@ def worker(input, field_contours, channel):
             priviosDart.Time = 0
             priviosDart.x = 25000
         if (dart.x > priviosDart.x):
-            t = CustomTimer(0.4, validateDart, args=(priviosDart, field_contours, channel, hand))
+            t = CustomTimer(0.4, validateDart, args=(priviosDart, field_contours, img, channel, hand))
             t.start()
         elif(dart.x <= priviosDart.x):
-            t = CustomTimer(0.4, validateDart, args=(dart, field_contours, channel, hand))
+            t = CustomTimer(0.4, validateDart, args=(dart, field_contours, img, channel, hand))
             t.start()
         priviosDart = dart
 
-def validateDart(dart, field_contours, channel, hand):
+def validateDart(dart, field_contours, img, channel, hand):
     if hand:
         print("Naechste Aufnahme")
         channel.basic_publish(exchange='',
                               routing_key='points',
                               body='next')
         return False
-     # DEBUG: Draw dart hit point into the image
-    img = cv2.imread('TestImage.png',cv2.IMREAD_COLOR)
-    img = cv2.circle(img, (dart.x,dart.y), 4, (0,0,255), -1)
-    smallImage = cv2.resize(img, (640,480))
+    # DEBUG: Draw dart hit point into the image
+    test = cv2.circle(img, (dart.x, dart.y), 6, (0,0,255), -1)
+    cv2.imshow("Hit_point", test)
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
-    cv2.imshow('Hit_Point',smallImage)
-    key = cv2.waitKey(0)
     # DEBUG: Draw dart hit point into the image
     for item in field_contours:
             if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
@@ -619,18 +616,15 @@ def commandWorker(commandQueue, channel):
 if __name__ == '__main__':
     # Init: Take Picture and finde the filds on the dart board
     light(True)
-    TakePicture(0)
-    TakePicture(0)
-    TakePicture(0)
-    image = TakePicture(2)
-    field_contours = GetField(image)
+    image = TakePicture(0)
+    field_contours, img = GetField(image)
 
     # Connect to the RabbitMQ Server 
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='martin-desktop'))
     channel = connection.channel()
     channel.queue_declare(queue='points', durable=False)
     channel.queue_declare(queue='task', durable=False)
-
+    cv2.namedWindow('Hit_point', cv2.WINDOW_AUTOSIZE)
     #channel.exchange_declare(exchange='amq.topic',
     #                         type='topic',
     #                         durable = True)
@@ -646,7 +640,7 @@ if __name__ == '__main__':
         elif command == 'light_off':
             light(False)
         elif command == 'game_on':
-            GetPictureStream(field_contours, channel, commandQueue)
+            GetPictureStream(field_contours, img, channel, commandQueue)
 
     # Close the channel and the connection
     channel.close()
