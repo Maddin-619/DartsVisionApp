@@ -49,6 +49,7 @@ class DartVision:
         self.amqpConnection = None
         self.amqpChannel = None
         self.commandQueue = Queue()
+        self.dartQueue = Queue()
 
     def init(self):
         self.light(True)
@@ -539,6 +540,8 @@ class DartVision:
     def detectDarts(self):
         queue = Queue()
         Process(target=self.worker, args=(queue,)).start()
+        # DEBUG: Draw dart hit point into the image
+        Process(target=self.showImage).start()
         #video analyse
         try:
             self.camera.resolution = (640, 480)
@@ -578,6 +581,9 @@ class DartVision:
 
                 # if the `q` key was pressed or another command gets in, break from the loop
                 if key == ord("q") or not self.commandQueue.empty():
+                    self.camera.close()
+                    queue.put('STOP')
+                    self.dartQueue.put('STOP')
                     break
         except Exception as e: print(e)
         finally:
@@ -617,8 +623,7 @@ class DartVision:
                                            routing_key='points',
                                            body='next')
             return False
-        # DEBUG: Draw dart hit point into the image
-        Process(target=self.showImage, args=(dart,)).start()
+        self.dartQueue.put(dart)
         for item in self.fieldContours:
                 if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
                     print(item.points)
@@ -639,14 +644,14 @@ class DartVision:
                                             body='3x' + str(item.points))
                     break
 
-    def showImage(self, dart):
-        cv2.destroyAllWindows()
-        test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
-        cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Hit_point', 1200,700)
-        cv2.imshow("Hit_point", test)
-        cv2.waitKey(200) & 0xFF
-        return
+    def showImage(self):
+        for dart in iter(self.dartQueue.get, 'STOP'):
+            cv2.destroyAllWindows()
+            test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
+            cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
+            cv2.resizeWindow('Hit_point', 1200,700)
+            cv2.imshow("Hit_point", test)
+            cv2.waitKey(1000) & 0xFF
 
 if __name__ == '__main__':
     try:
