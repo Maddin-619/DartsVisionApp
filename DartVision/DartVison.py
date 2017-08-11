@@ -52,7 +52,7 @@ class DartVision:
 
     def init(self):
         self.light(True)
-        self.takePicture(1)
+        self.takePicture(0)
         self.getField()
         self.connect('martin-desktop')
 
@@ -586,7 +586,6 @@ class DartVision:
             queue.put('STOP')
 
     def worker(self, inputQueue):
-        cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
         priviosDart = Dart()
         priviosDart.Time = 0
         priviosDart.x = 25000
@@ -619,10 +618,12 @@ class DartVision:
                                            body='next')
             return False
         # DEBUG: Draw dart hit point into the image
-        test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
-        cv2.imshow("Hit_point", test)
-        cv2.waitKey(1000000)
         cv2.destroyAllWindows()
+        test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
+        cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Hit_point', 1296,976)
+        cv2.imshow("Hit_point", test)
+        cv2.waitKey(1) & 0xFF
         # DEBUG: Draw dart hit point into the image
         for item in self.fieldContours:
                 if cv2.pointPolygonTest(item.contour,(dart.x,dart.y),False) >= 0:
