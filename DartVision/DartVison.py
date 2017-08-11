@@ -210,7 +210,7 @@ class DartVision:
                 cy = int(M['m01']/M['m00'])
                 white_contours.append(Field(hull, cx, cy))
 
-        if((len(white_contours)<20) || (len(black_contours)<20) || (len(red_contours)<21) || (len(green_contours)<21)): return
+        if((len(white_contours)<20) or (len(black_contours)<20) or (len(red_contours)<21) or (len(green_contours)<21)): return
 
         # Calculate the Points of Field
         black_contours.sort(key = lambda Field: Field.x, reverse=False)
