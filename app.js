@@ -17,7 +17,7 @@ var game_logic = require('./game_logic/game_logic');
 var app = express();
 
 var spawn = require('child_process').spawn,
-    py    = spawn('python', ['DartVision/DartVison.py']);
+    py    = spawn('python', ['DartVision/DartVision.py']);
 
 var hostname = 'martin-desktop';//os.hostname;
 
