@@ -590,6 +590,7 @@ class DartVision:
             cv2.destroyAllWindows()
             self.camera.close()
             queue.put('STOP')
+            self.dartQueue.put('STOP')
 
     def worker(self, inputQueue):
         priviosDart = Dart()
@@ -646,6 +647,7 @@ class DartVision:
 
     def showImage(self):
         for dart in iter(self.dartQueue.get, 'STOP'):
+            print("test")
             cv2.destroyAllWindows()
             test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
             cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
