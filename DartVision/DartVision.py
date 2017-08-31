@@ -53,7 +53,7 @@ class DartVision:
 
     def init(self):
         self.light(True)
-        self.takePicture(0)
+        self.takePicture(1)
         self.getField()
         self.connect('martin-desktop')
 
@@ -525,9 +525,12 @@ class DartVision:
 
     def disconnect(self):
         # Close the channel and the connection
-        self.amqpChannel.close()
-        self.amqpConnection.close()
-        self.camera.close()
+        if self.camera:
+            self.camera.close()
+        if self.amqpChannel:
+            self.amqpChannel.close()
+        if self.amqpConnection:
+            self.amqpConnection.close()
         print('disconnected')
 
     def commandListener(self, commandQueue, channel):
@@ -540,8 +543,6 @@ class DartVision:
     def detectDarts(self):
         queue = Queue()
         Process(target=self.worker, args=(queue,)).start()
-        # DEBUG: Draw dart hit point into the image
-        Process(target=self.showImage).start()
         #video analyse
         try:
             self.camera.resolution = (640, 480)
@@ -574,21 +575,21 @@ class DartVision:
                 # show the frame
                 #dst = cv2.add(fgmask,gray)
                 #cv2.imshow("Dart_Points", dst)
-                key = cv2.waitKey(1) & 0xFF
+                #key = cv2.waitKey(1) & 0xFF
 
                 # clear the stream in preparation for the next frame
                 rawCapture.truncate(0)
-
+                # DEBUG: Draw dart hit point into the image
+                self.showImage()
                 # if the `q` key was pressed or another command gets in, break from the loop
-                if key == ord("q") or not self.commandQueue.empty():
-                    self.camera.close()
+                '''key == ord("q") or'''
+                if not self.commandQueue.empty():
                     queue.put('STOP')
                     self.dartQueue.put('STOP')
                     break
         except Exception as e: print(e)
         finally:
             cv2.destroyAllWindows()
-            self.camera.close()
             queue.put('STOP')
             self.dartQueue.put('STOP')
 
@@ -646,14 +647,17 @@ class DartVision:
                     break
 
     def showImage(self):
-        for dart in iter(self.dartQueue.get, 'STOP'):
-            print("test")
+        if not self.dartQueue.empty():
+            dart = self.dartQueue.get()
             cv2.destroyAllWindows()
-            test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (0,0,255), -1)
+            test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (255,0,0), -1)
+            #test = cv2.resize(test, (1200,700))
+            print("test")
             cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('Hit_point', 1200,700)
             cv2.imshow("Hit_point", test)
-            cv2.waitKey(1000) & 0xFF
+            cv2.waitKey(160) & 0xFF
+            print('test1')
 
 if __name__ == '__main__':
     try:
