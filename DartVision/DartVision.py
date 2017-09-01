@@ -581,8 +581,7 @@ class DartVision:
                 rawCapture.truncate(0)
                 # DEBUG: Draw dart hit point into the image
                 self.showImage()
-                # if the `q` key was pressed or another command gets in, break from the loop
-                '''key == ord("q") or'''
+                # if another command gets in, break from the loop
                 if not self.commandQueue.empty():
                     queue.put('STOP')
                     self.dartQueue.put('STOP')
@@ -651,13 +650,10 @@ class DartVision:
             dart = self.dartQueue.get()
             cv2.destroyAllWindows()
             test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (255,0,0), -1)
-            #test = cv2.resize(test, (1200,700))
-            print("test")
             cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('Hit_point', 1200,700)
             cv2.imshow("Hit_point", test)
             cv2.waitKey(160) & 0xFF
-            print('test1')
 
 if __name__ == '__main__':
     try:

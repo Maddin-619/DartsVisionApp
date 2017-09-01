@@ -1,0 +1,29 @@
+{
+  "name": "dartsvisionapp",
+  "description": "Web App for Dart game",
+  "main": "",
+  "authors": [
+    "Martin Brenner"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/lib",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "angularjs#^1.6.6",
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.7.0",
+    "stomp-websocket": "^2.3.4",
+    "sockjs": "^0.3.4",
+    "angular-route": "^1.6.6",
+    "angular-resource": "^1.6.6",
+    "animate.css": "^3.5.2",
+    "angular-chosen-localytics": "^1.8.0"
+  }
+}

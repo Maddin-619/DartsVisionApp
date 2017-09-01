@@ -11,3 +11,5 @@ a {
 .active, .inactive {font-size:40px;cursor:pointer;}
 i.active { color: #5cb85c}
 i.inactive {color: #d9534f}
+
+select {width: 400px;}

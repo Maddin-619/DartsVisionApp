@@ -4,30 +4,30 @@
     <meta charset="utf-8" />
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
-    <link data-require="bootstrap@*" data-semver="3.2.0" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css" />
-    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" />
+    
+    <!-- Bower Libs -->
     <!-- include SockJS -->
-     <script src="http://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script>
+    <script src='/lib/sockjs/sockjs.js'></script>
     <!-- include the client library -->    
-    <script src="lib/stomp.js"></script>
+    <script src="lib/stomp-websocket/lib/stomp.js"></script>
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular-route/angular-route.min.js"></script>
+    <script src="lib/angular-resource/angular-resource.min.js"></script>
+    <script src="lib/angular-chosen-localytics/dist/angular-chosen.min.js"></script>
+    <script src="lib/chosen/chosen.jquery.min.js"></script>
+
+    <!-- Bower stylesheets -->
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="lib/animate.css/animate.min.css">
+    <link rel="stylesheet" href="lib/chosen/chosen.css">
   </head>
   <body>
     <h1><%= title %></h1>
 
     <ng-view></ng-view>
-
-    <!-- Libraries -->
-    <script src="https://code.angularjs.org/1.6.4/angular.min.js"></script>
-    <script src="https://code.angularjs.org/1.6.4/angular-route.min.js"></script>
-    <script src="https://code.angularjs.org/1.6.4/angular-resource.min.js"></script>
-
-    <link data-require="chosen@*" data-semver="1.0.0" rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.min.css" />
-    <script data-require="jquery@*" data-semver="2.2.0" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-    <script data-require="chosen@*" data-semver="1.0.0" src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.jquery.min.js"></script>
-    <script data-require="chosen@*" data-semver="1.0.0" src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.proto.min.js"></script>
-    
-    <script src="https://rawgit.com/leocaseiro/angular-chosen/master/dist/angular-chosen.min.js"></script>
-    <style>select {width: 400px;}</style>
 
     <!-- Template -->
     <script type="text/ng-template" id="/players.html">
@@ -69,14 +69,15 @@
       <h1>New Game</h1>
       <label for="players">Select Players: </label>
       <select multiple
-              /*chosen*/
+              chosen
+              required
               placeholder_text_multiple="'Select Players'"
               no_results_text="'Could not find any players :('"
               ng-model="game.players"
               ng-options="player._id as player.name for player in players">
       </select><br><br>
       <lable>Points:
-        <select ng-model="game.gamepoints" convert-to-number>
+        <select chosen required disable-search="true" ng-model="game.gamepoints" convert-to-number placeholder-text-single="'Select game points'">
           <option value="301">301</option>
           <option value="501">501</option>
           <option value="701">701</option>
@@ -196,7 +197,7 @@
         .controller('NewGameController', ['$scope', 'Players', 'Game', 'Command', '$location', function ($scope, Players, Game, Command, $location) {
           $scope.players = Players.query();
           $scope.game = {
-            gamepoints : 501,
+            gamepoints : '501',
             doublein  : false,
             doubleout : true,
             elimination: false

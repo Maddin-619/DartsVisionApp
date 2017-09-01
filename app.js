@@ -32,7 +32,7 @@ mongoose.connect('mongodb://' + hostname +'/dartbackend', {
 
 // connect to RabbitAMQP Server
 amqp.connect('amqp://' + hostname +':5672', function(err, connection) {
-    console.log('connection to RabbitAMQP succesful')
+    console.log('connection to RabbitAMQP succesful');
     connection.createChannel(function(err, channel) {
         channel.assertQueue('task',{durable: false});
         channel.assertExchange('amq.topic', 'topic', {durable: true});
