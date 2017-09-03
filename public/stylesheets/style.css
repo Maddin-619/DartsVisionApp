@@ -1,15 +1,16 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
-
 a {
   color: #00B7FF;
 }
 
-.active, .inactive {font-size:40px;cursor:pointer;}
-.active, .inactive {font-size:40px;cursor:pointer;}
-i.active { color: #5cb85c}
-i.inactive {color: #d9534f}
+.switch.active
+{
+  background-color: #5cb85c;
+  border: 1px solid #5cb85c;
+}
+.switch
+{
+  background-color: #d9534f;
+  border: 1px solid #d9534f;
+}
 
 select {width: 400px;}
