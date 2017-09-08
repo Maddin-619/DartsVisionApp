@@ -14,3 +14,32 @@ a {
 }
 
 select {width: 400px;}
+
+.td-inverse {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.no-border {
+  border-left: 0px !important;
+  border-right: 0px !important;
+  border-bottom: 0px !important;
+  border-top: 0px !important;
+}
+
+.red {
+  background-color: #B31613;
+  color: #FFFFFF;
+}
+
+.green {
+  background-color: #06581F;
+  color: #FFFFFF;
+}
+
+table {
+  border-left: 0px !important;
+  border-right: 0px !important;
+  border-bottom: 0px !important;
+  border-top: 0px !important;
+}
