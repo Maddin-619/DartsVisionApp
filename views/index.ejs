@@ -259,7 +259,7 @@
             <td class ="red" ng-show="player.round.length == 1"></td>
             <td class ="red" ng-show="player.round.length == 2"></td>
             <td ng-if="player.turn" class="no-border text-center green" title="Turn">
-                &#9664;
+                <h4 class="no-margin"><span class="glyphicon glyphicon-triangle-left" aria-hidden="true"></span></h4>
             </td>
           </tr>
         </tbody>
@@ -456,9 +456,9 @@
       $scope.year = new Date().getFullYear();
       $scope.players = Game.getPlayers();
       if (location.search == '?ws') {
-        var ws = new WebSocket('ws://' + window.location.hostname + ':15674/ws');
+        var ws = new WebSocket('ws://' + 'martin-desktop' + ':15674/ws'); //window.location.hostname
       } else {
-        var ws = new SockJS('http://' + window.location.hostname + ':15674/stomp');
+        var ws = new SockJS('http://' + 'martin-desktop' + ':15674/stomp'); //window.location.hostname
       }
       var client = Stomp.over(ws);
       client.heartbeat.outgoing = 0;
