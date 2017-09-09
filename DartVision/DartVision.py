@@ -584,7 +584,6 @@ class DartVision:
                 # if another command gets in, break from the loop
                 if not self.commandQueue.empty():
                     queue.put('STOP')
-                    self.dartQueue.put('STOP')
                     break
         except Exception as e:
             import traceback
