@@ -251,7 +251,7 @@
             <td class="text-center red" title="Points">
               <b>{{player.points}}</b></td>
             <td class="text-center red" ng-repeat="score in player.round" title="Score">
-              <b>{{score.value}</b>}</td>
+              <b>{{score.value}}</b></td>
             <td class ="red" ng-show="player.round.length == 0"></td>
             <td class ="red" ng-show="player.round.length == 0"></td>
             <td class ="red" ng-show="player.round.length == 0"></td>
@@ -442,7 +442,11 @@
         for (var index = 0; index < $scope.game.players.length; index++){
           Players.update({id: $scope.game.players[index]}, {points: $scope.game.gamepoints});
         }
-        var game = new Game({ gamepoints: $scope.game.gamepoints, doublein: $scope.game.doublein, doubleout: $scope.game.doubleout, elimination: $scope.game.elimination, players : $scope.game.players });
+        var game = new Game({ gamepoints: $scope.game.gamepoints,
+                              doublein: $scope.game.doublein, 
+                              doubleout: $scope.game.doubleout,
+                              elimination: $scope.game.elimination,
+                              players : $scope.game.players });
         game.$save(function(){
           $location.url('/game');
         });
@@ -457,6 +461,8 @@
         var ws = new SockJS('http://' + window.location.hostname + ':15674/stomp');
       }
       var client = Stomp.over(ws);
+      client.heartbeat.outgoing = 0;
+      client.heartbeat.incoming = 0;
       var on_connect = function() {
         console.log('connected');
         id = client.subscribe("/topic/score", function(d) {
