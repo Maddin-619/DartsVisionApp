@@ -82,15 +82,35 @@
                   <span ng-show="sortType == 'name' && sortReverse == false" class="fa fa-caret-down"></span>
                   <span ng-show="sortType == 'name' && sortReverse == true" class="fa fa-caret-up"></span>
                 </th>
-                <th nowrap ng-click="sortType = 'average'; sortReverse = !sortReverse">
-                  Average
-                  <span ng-show="sortType == 'average' && sortReverse == false" class="fa fa-caret-down"></span>
-                  <span ng-show="sortType == 'average' && sortReverse == true" class="fa fa-caret-up"></span>
+                <th nowrap ng-click="sortType = 'playedgames'; sortReverse = !sortReverse">
+                  Games
+                  <span ng-show="sortType == 'playedgames' && sortReverse == false" class="fa fa-caret-down"></span>
+                  <span ng-show="sortType == 'playedgames' && sortReverse == true" class="fa fa-caret-up"></span>
                 </th>
                 <th nowrap ng-click="sortType = 'wins'; sortReverse = !sortReverse">
                   Wins
                   <span ng-show="sortType == 'wins' && sortReverse == false" class="fa fa-caret-down"></span>
                   <span ng-show="sortType == 'wins' && sortReverse == true" class="fa fa-caret-up"></span>
+                </th>
+                <th nowrap ng-click="sortType = 'totalaverage'; sortReverse = !sortReverse">
+                  Average
+                  <span ng-show="sortType == 'totalaverage' && sortReverse == false" class="fa fa-caret-down"></span>
+                  <span ng-show="sortType == 'totalaverage' && sortReverse == true" class="fa fa-caret-up"></span>
+                </th>
+                <th nowrap ng-click="sortType = 'onehundredandeighty'; sortReverse = !sortReverse">
+                  180er
+                  <span ng-show="sortType == 'onehundredandeighty' && sortReverse == false" class="fa fa-caret-down"></span>
+                  <span ng-show="sortType == 'onehundredandeighty' && sortReverse == true" class="fa fa-caret-up"></span>
+                </th>
+                <th nowrap ng-click="sortType = 'doppelquote'; sortReverse = !sortReverse">
+                  Double %
+                  <span ng-show="sortType == 'doppelquote' && sortReverse == false" class="fa fa-caret-down"></span>
+                  <span ng-show="sortType == 'doppelquote' && sortReverse == true" class="fa fa-caret-up"></span>
+                </th>
+                <th nowrap ng-click="sortType = 'highfinish'; sortReverse = !sortReverse">
+                  High finishes
+                  <span ng-show="sortType == 'highfinish' && sortReverse == false" class="fa fa-caret-down"></span>
+                  <span ng-show="sortType == 'highfinish' && sortReverse == true" class="fa fa-caret-up"></span>
                 </th>
                 <th class="text-center">Action</th>
               </tr>
@@ -100,7 +120,7 @@
                     <input class="form-control" type="text" ng-model="search.name" placeholder="Search Player">
                   </div>
                 </th>
-                <th></th><th></th><th></th>
+                <th></th><th></th><th></th><th></th><th></th><th></th><th></th>
               </tr>
             </thead>
             <tr ng-repeat="player in players | orderBy:sortType:sortReverse | filter: search">
@@ -110,8 +130,12 @@
                   <input class="form-control" ng-show="editing[$index]" type="text" ng-model="player.name">
                 </div>
               </td>
-              <td>{{player.average}}</td>
+              <td>{{player.playedgames}}</td>
               <td>{{player.wins}}</td>
+              <td>{{player.totalaverage}}</td>
+              <td>{{player.onehundredandeighty}}</td>
+              <td>{{player.doppelquote}}</td>
+              <td>{{player.highfinish}}</td>
               <td class="text-center">
                 <a class="btn btn-info btn-xs" ng-show="!editing[$index]" ng-click="edit($index)"><span class="glyphicon glyphicon-edit"></span> Edit</a>
                 <a class="btn btn-danger btn-xs" ng-show="!editing[$index]"ng-click="remove($index)"><span class="fa fa-trash-o"></span> Del</a>
@@ -142,7 +166,7 @@
       <div ui-content-for="title">
           <span>{{ player.name }}</span>
       </div>
-      average: <textarea ng-model="player.average"></textarea><br>
+      Total average: <textarea ng-model="player.totalaverage"></textarea><br>
       wins: <textarea ng-model="player.wins"></textarea><br><br>
 
       <button ng-click="update()">Update</button>
@@ -188,6 +212,32 @@
               <option value="701">701</option>
             </select>
           </div>
+        </div>
+        <div class="form-group">
+          <lable class="control-label col-sm-2" for="sets">First to sets:</lable>
+          <div class="col-sm-4">
+            <select class="form-control" name="sets" id="sets" chosen required disable-search="true" ng-model="game.sets" convert-to-number placeholder-text-single="'Select number of sets'">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+            <lable class="control-label col-sm-2" for="legs">Legs:</lable>
+            <div class="col-sm-4">
+              <select class="form-control" name="legs" id="legs" chosen required disable-search="true" ng-model="game.legs" convert-to-number placeholder-text-single="'Select number of legs'">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
         </div>
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-6">
@@ -238,6 +288,8 @@
         <thead class="">
             <tr>
               <th class="td-inverse no-border" >First to 1</th>
+              <th class="td-inverse text-center no-border">SETS</th>
+              <th class="td-inverse text-center no-border">LEGS</th>
               <th class="td-inverse no-border"></th>
               <th class="td-inverse text-center no-border">Dart 1</th>
               <th class="td-inverse text-center no-border">Dart 2</th>
@@ -247,11 +299,20 @@
         <tbody>
           <tr ng-repeat="player in players">
             <td title="Name">
-              <b>{{player.name}}</b></td>
+              <b>{{player.name}}</b>
+            </td>
+            <td class="text-center red" title="wonsets">
+                <b>{{player.wonsets}}</b>
+            </td>
+            <td class="text-center red" title="wonlegs">
+              <b>{{player.wonlegs}}</b>
+            </td>
             <td class="text-center red" title="Points">
-              <b>{{player.points}}</b></td>
+              <b>{{player.points}}</b>
+            </td>
             <td class="text-center red" ng-repeat="score in player.round" title="Score">
-              <b>{{score.value}}</b></td>
+              <b>{{score.value}}</b>
+            </td>
             <td class ="red" ng-show="player.round.length == 0"></td>
             <td class ="red" ng-show="player.round.length == 0"></td>
             <td class ="red" ng-show="player.round.length == 0"></td>
@@ -265,7 +326,7 @@
         </tbody>
         <tfoot>
         <tr>
-          <td class="td-inverse"colspan ="5">
+          <td class="td-inverse"colspan ="7">
             {{year}} HEUMADEN CHAMPIONSHIP
           </td>
         </tr>
@@ -361,6 +422,8 @@
       $scope.players = Players.query();
       $scope.game = {
         gamepoints : '501',
+        sets: '1',
+        legs: '1',
         doublein  : false,
         doubleout : true,
         elimination: false
@@ -440,9 +503,11 @@
         Command.get({game: true})
         Game.delete();
         for (var index = 0; index < $scope.game.players.length; index++){
-          Players.update({id: $scope.game.players[index]}, {points: $scope.game.gamepoints});
+          Players.update({id: $scope.game.players[index]}, {points: $scope.game.gamepoints, wonsets: 0, wonlegs: 0});
         }
         var game = new Game({ gamepoints: $scope.game.gamepoints,
+                              sets: $scope.game.sets,
+                              legs: $scope.game.legs,
                               doublein: $scope.game.doublein, 
                               doubleout: $scope.game.doubleout,
                               elimination: $scope.game.elimination,

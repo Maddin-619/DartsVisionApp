@@ -5,11 +5,15 @@ var RoundSchema = new mongoose.Schema({
 });
 var PlayerSchema = new mongoose.Schema({
   name: String,
-  average: { type: Number, default: 0 },
+  totalaverage: { type: Number, default: 0 },
+  gameaverage: { type: Number, default: 0 },
   highfinish: { type: Number, default: 0 },
   onehundredandeighty: { type: Number, default: 0 },
   doppelquote: { type: Number, default: 0 },
   wins: { type: Number, default: 0 },
+  wonlegs: { type: Number, default: 0 },
+  wonsets: { type: Number, default: 0 },
+  playedgames: { type: Number, default: 0 },
   points: { type: Number, default: 0 },
   round: [RoundSchema],
   turn: {type: Boolean, default: false},

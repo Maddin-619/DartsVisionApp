@@ -1,7 +1,9 @@
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema
+var mongoose = require('mongoose'),
+  Schema = mongoose.Schema;
 var GameSchema = new mongoose.Schema({
   gamepoints: Number,
+  sets: Number,
+  legs: Number,
   doublein: Boolean,
   doubleout: Boolean,
   elimination: Boolean,
