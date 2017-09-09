@@ -587,8 +587,9 @@ class DartVision:
                     self.dartQueue.put('STOP')
                     break
         except Exception as e:
-            print(e.__traceback__)
-            print(e)
+            import traceback
+            traceback.print_exc()
+            #print(e)
         finally:
             cv2.destroyAllWindows()
             queue.put('STOP')
@@ -667,7 +668,8 @@ if __name__ == '__main__':
         print('Killed by user')
         sys.exit(0)
     except Exception as e:
-        print(e.__traceback__)
-        print(e)
+        import traceback
+        traceback.print_exc()
+        #print(e)
     finally:
         dartVision.disconnect()
