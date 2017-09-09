@@ -592,7 +592,6 @@ class DartVision:
         finally:
             cv2.destroyAllWindows()
             queue.put('STOP')
-            self.dartQueue.put('STOP')
 
     def worker(self, inputQueue):
         priviosDart = Dart()
