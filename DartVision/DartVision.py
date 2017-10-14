@@ -37,6 +37,8 @@ class Dart:
         self.contour = contour
         self.x = ((x*2592)//640)
         self.y = ((y*1952)//480)
+        self.xOriginal = x
+        self.yOriginal = y
         self.detectTime = detectTime
 
 class DartVision:
@@ -46,6 +48,7 @@ class DartVision:
         self.imageDartBoard = None
         self.fieldContours = None
         self.imageDebug = None
+        self.imageDebugGray = None
         self.amqpConnection = None
         self.amqpChannel = None
         self.commandQueue = Queue()
@@ -69,6 +72,8 @@ class DartVision:
                 self.light(False)
             elif command == 'game_on':
                 self.detectDarts()
+            elif command == 'game_on_debug':
+                self.detectDarts(debug = True)
         
 
     def light(self, switch):
@@ -540,7 +545,7 @@ class DartVision:
             commandQueue.put(msg)
             channel.basic_ack(method_frame.delivery_tag)
 
-    def detectDarts(self):
+    def detectDarts(self, debug = False):
         queue = Queue()
         Process(target=self.worker, args=(queue,)).start()
         #video analyse
@@ -573,14 +578,16 @@ class DartVision:
                     dart_contours.sort(key = lambda Dart: Dart.x, reverse=False)
                     queue.put(dart_contours[0])
                 # show the frame
-                #dst = cv2.add(fgmask,gray)
+                dst = cv2.add(fgmask,gray)
+                self.imageDebugGray = dst
                 #cv2.imshow("Dart_Points", dst)
                 #key = cv2.waitKey(1) & 0xFF
 
                 # clear the stream in preparation for the next frame
                 rawCapture.truncate(0)
                 # DEBUG: Draw dart hit point into the image
-                self.showImage()
+                if (debug == True):
+                    self.showImage()
                 # if another command gets in, break from the loop
                 if not self.commandQueue.empty():
                     queue.put('STOP')
@@ -651,9 +658,12 @@ class DartVision:
             dart = self.dartQueue.get()
             cv2.destroyAllWindows()
             test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (255,0,0), -1)
+            testGray = cv2.circle(self.imageDebugGray.copy(), (dart.xOriginal, dart.yOriginal), 6, (255,0,0), -1)
             cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('Hit_point', 1200,700)
             cv2.imshow("Hit_point", test)
+            cv2.namedWindow('Hit_point_Gray', cv2.WINDOW_NORMAL)
+            cv2.imshow("Hit_point1", testGray)
             cv2.waitKey(160) & 0xFF
 
 if __name__ == '__main__':
@@ -668,6 +678,5 @@ if __name__ == '__main__':
     except Exception as e:
         import traceback
         traceback.print_exc()
-        #print(e)
     finally:
         dartVision.disconnect()

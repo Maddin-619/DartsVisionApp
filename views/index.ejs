@@ -261,6 +261,10 @@
                   <button type="button" class="btn" data-color="primary">Elimination</button>
                   <input class="form-control hidden" id="elimination" name="elimination" type="checkbox" ng-model="game.elimination">
               </span>
+              <span class="button-checkbox col-sm-offset-2 col-xs-offset-2">
+                <button type="button" class="btn" id="debug" data-color="primary">Debug</button>
+                <input class="form-control hidden" id="debug" name="debug" type="checkbox" ng-model="debug">
+            </span>
           </div>
         </div>
         <div class="form-group">
@@ -428,6 +432,7 @@
         doubleout : true,
         elimination: false
       };
+      $scope.debug = false;
       angular.element(function () {
         angular.element('.button-checkbox').each(function () {
   
@@ -472,7 +477,15 @@
               if (isChecked) {
                   $button
                       .removeClass('btn-default')
-                      .addClass('btn-' + color + ' active');
+                      .addClass('btn-' + color + ' active')
+                      if ($button.attr('id') == "debug") {
+                        $button
+                          .css({
+                            "background-color": "",
+                            "border": "",
+                            "font-size": ""
+                          });
+                      }
                   $checkbox
                       .removeClass('ng-empty')
                       .addClass('ng-not-empty');
@@ -480,7 +493,15 @@
               else {
                   $button
                       .removeClass('btn-' + color + ' active')
-                      .addClass('btn-default');
+                      .addClass('btn-default')
+                      if ($button.attr('id') == "debug") {
+                        $button
+                          .css({
+                            "background-color": "transparent",
+                            "border": "none",
+                            "font-size": 0
+                          });
+                      }
                   $checkbox
                       .removeClass('ng-not-empty')
                       .addClass('ng-empty');
@@ -500,7 +521,7 @@
       
       $scope.create = function(){
         if (!$scope.game.players) return;
-        Command.get({game: true})
+        Command.get({game: true, debug: $scope.debug});
         Game.delete();
         for (var index = 0; index < $scope.game.players.length; index++){
           Players.update({id: $scope.game.players[index]}, {points: $scope.game.gamepoints, wonsets: 0, wonlegs: 0});

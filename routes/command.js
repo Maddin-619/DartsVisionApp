@@ -11,8 +11,13 @@ router.get('/', function (req, res, next) {
     global.channel.sendToQueue('task',new Buffer('light_off'),{persistent: true, deliveryMode: 2});
     res.send('light off');
   } else if (req.query.game == 'true') {
-    console.log('game on');
-    global.channel.sendToQueue('task',new Buffer('game_on'),{persistent: true, deliveryMode: 2});
+    if (req.query.debug == 'true') {
+      console.log('game on debug');
+      global.channel.sendToQueue('task',new Buffer('game_on_debug'),{persistent: true, deliveryMode: 2});
+    } else if (req.query.debug == 'false') {
+      console.log('game on');
+      global.channel.sendToQueue('task',new Buffer('game_on'),{persistent: true, deliveryMode: 2});
+    }
     res.send('game on');
   }else if (req.query.game == 'false') {
     console.log('game off');

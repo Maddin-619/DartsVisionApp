@@ -140,4 +140,4 @@ module.exports = function() {
         }
       });
     }, {noAck: true});
-}
+};
