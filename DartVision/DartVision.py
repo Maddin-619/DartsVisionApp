@@ -72,10 +72,11 @@ class DartVision:
             elif command == 'light_off':
                 self.light(False)
             elif command == 'game_on':
+                self.debug = False
                 self.detectDarts()
             elif command == 'game_on_debug':
-                self.detectDarts()
                 self.debug = True
+                self.detectDarts()
         
 
     def light(self, switch):
@@ -664,9 +665,8 @@ class DartVision:
             cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('Hit_point', 1200,700)
             cv2.imshow("Hit_point", test)
-            cv2.namedWindow('Hit_point_Gray', cv2.WINDOW_NORMAL)
             cv2.imshow("Hit_point_Gray", testGray)
-            cv2.waitKey(160) & 0xFF
+            cv2.waitKey(180) & 0xFF
 
 if __name__ == '__main__':
     try:
