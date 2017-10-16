@@ -33,10 +33,10 @@ class Field:
 
 class Dart:
 
-    def __init__(self, contour = None, x = 0, y = 0, detectTime = 0):
+    def __init__(self, contour = None, x = 0, y = 0, detectTime = 0, resolutionPicture, resolutionVideo):
         self.contour = contour
-        self.x = ((x*2592)//640)
-        self.y = ((y*1952)//480)
+        self.x = ((x*resolutionPicture[0])//resolutionVideo[0])
+        self.y = ((y*resolutionPicture[1])//resolutionVideo[0])
         self.xOriginal = x
         self.yOriginal = y
         self.detectTime = detectTime
@@ -45,6 +45,9 @@ class DartVision:
     
     def __init__(self):
         self.camera = PiCamera()
+        # (640, 480)
+        self.resolutionVideo = (1920,1080)
+        self.resolutionPicture = (2592, 1952)
         self.imageDartBoard = None
         self.fieldContours = None
         self.imageDebug = None
@@ -86,7 +89,7 @@ class DartVision:
 
     def takePicture(self, sleeptime):
         
-        self.camera.resolution = (2592,1952)
+        self.camera.resolution = self.resolutionPicture
         rawCapture = PiRGBArray(self.camera)
 
         # allow the camera to warmup
@@ -553,9 +556,9 @@ class DartVision:
         Process(target=self.worker, args=(queue,)).start()
         #video analyse
         try:
-            self.camera.resolution = (640, 480)
+            self.camera.resolution = self.resolutionVideo
             self.camera.framerate = 4
-            rawCapture = PiRGBArray(self.camera, size=(640, 480))
+            rawCapture = PiRGBArray(self.camera, size=self.resolutionVideo)
             # allow the camera to warmup
             time.sleep(0.1)
             fgbg = cv2.createBackgroundSubtractorMOG2(history=20, varThreshold=40, detectShadows=0)
@@ -575,7 +578,7 @@ class DartVision:
                 for cnt in contours:
                     if(cv2.contourArea(cnt)>20):
                         leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
-                        dart_contours.append(Dart(cnt,leftmost[0],leftmost[1],time.time()))
+                        dart_contours.append(Dart(cnt,leftmost[0],leftmost[1],time.time(),self.resolutionPicture, self.resolutionVideo))
                         #print(cv2.contourArea(cnt))
                 if len(dart_contours) > 0:
                     dart_contours.sort(key = lambda Dart: Dart.x, reverse=False)
