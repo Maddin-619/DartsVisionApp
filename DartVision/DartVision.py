@@ -33,10 +33,10 @@ class Field:
 
 class Dart:
 
-    def __init__(self, contour = None, x = 0, y = 0, detectTime = 0, resolutionPicture, resolutionVideo):
+    def __init__(self, resolutionPicture, resolutionVideo, contour = None, x = 0, y = 0, detectTime = 0):
         self.contour = contour
         self.x = ((x*resolutionPicture[0])//resolutionVideo[0])
-        self.y = ((y*resolutionPicture[1])//resolutionVideo[0])
+        self.y = ((y*resolutionPicture[1])//resolutionVideo[1])
         self.xOriginal = x
         self.yOriginal = y
         self.detectTime = detectTime
@@ -46,7 +46,7 @@ class DartVision:
     def __init__(self):
         self.camera = PiCamera()
         # (640, 480)
-        self.resolutionVideo = (1920,1080)
+        self.resolutionVideo = (1296, 976)
         self.resolutionPicture = (2592, 1952)
         self.imageDartBoard = None
         self.fieldContours = None
@@ -557,18 +557,18 @@ class DartVision:
         #video analyse
         try:
             self.camera.resolution = self.resolutionVideo
-            self.camera.framerate = 4
+            self.camera.framerate = 2
             rawCapture = PiRGBArray(self.camera, size=self.resolutionVideo)
             # allow the camera to warmup
             time.sleep(0.1)
-            fgbg = cv2.createBackgroundSubtractorMOG2(history=20, varThreshold=40, detectShadows=0)
+            fgbg = cv2.createBackgroundSubtractorMOG2(history=20, varThreshold=30, detectShadows=0)
             kernel = np.ones((3,3),np.uint8)
             # capture frames from the camera
             for frame in self.camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
                 # grab the raw NumPy array representing the image, then initialize the timestamp
                 # and occupied/unoccupied text
                 image = frame.array
-                gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+                #gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
                 fgmask = fgbg.apply(image)
                 fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_CLOSE, kernel, iterations = 1)
                 fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel, iterations = 1)
@@ -576,18 +576,21 @@ class DartVision:
                 dart_contours = []
                 img, contours, hierarchy = cv2.findContours(fgmask,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
                 for cnt in contours:
-                    if(cv2.contourArea(cnt)>20):
+                    print(cv2.contourArea(cnt))
+                    if(cv2.contourArea(cnt)>180):
                         leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
-                        dart_contours.append(Dart(cnt,leftmost[0],leftmost[1],time.time(),self.resolutionPicture, self.resolutionVideo))
+                        dart_contours.append(Dart(self.resolutionPicture, self.resolutionVideo, cnt,leftmost[0],leftmost[1],time.time()))
                         #print(cv2.contourArea(cnt))
                 if len(dart_contours) > 0:
                     dart_contours.sort(key = lambda Dart: Dart.x, reverse=False)
                     queue.put(dart_contours[0])
                 # show the frame
-                dst = cv2.add(fgmask,gray)
-                self.imageDebugGray = dst
+                #dst = cv2.add(fgmask,gray)
+                #self.imageDebugGray = dst
+                #cv2.namedWindow('Dart_Points', cv2.WINDOW_NORMAL)
+                #cv2.resizeWindow('Dart_Points', 1200,700)
                 #cv2.imshow("Dart_Points", dst)
-                #key = cv2.waitKey(1) & 0xFF
+                #key = cv2.waitKey(160) & 0xFF
 
                 # clear the stream in preparation for the next frame
                 rawCapture.truncate(0)
@@ -606,15 +609,15 @@ class DartVision:
             queue.put('STOP')
 
     def worker(self, inputQueue):
-        priviosDart = Dart()
+        priviosDart = Dart(self.resolutionPicture, self.resolutionVideo)
         priviosDart.Time = 0
         priviosDart.x = 25000
         hand = False
         t = None
         for dart in iter(inputQueue.get, 'STOP'):
-            if(cv2.contourArea(dart.contour)>10000):
+            if(cv2.contourArea(dart.contour)>20000):
                 hand = True
-            if (dart.detectTime - priviosDart.detectTime < 0.5):
+            if (dart.detectTime - priviosDart.detectTime < 1.5):
                 if t:
                     t.cancel()
             else:
@@ -623,10 +626,10 @@ class DartVision:
                 priviosDart.Time = 0
                 priviosDart.x = 25000
             if (dart.x > priviosDart.x):
-                t = CustomTimer(0.4, self.validateDart, args=(priviosDart, hand))
+                t = CustomTimer(1.2, self.validateDart, args=(priviosDart, hand))
                 t.start()
             elif(dart.x <= priviosDart.x):
-                t = CustomTimer(0.4, self.validateDart, args=(dart, hand))
+                t = CustomTimer(1.2, self.validateDart, args=(dart, hand))
                 t.start()
             priviosDart = dart
 
@@ -664,11 +667,11 @@ class DartVision:
             dart = self.dartQueue.get()
             cv2.destroyAllWindows()
             test = cv2.circle(self.imageDebug.copy(), (dart.x, dart.y), 6, (255,0,0), -1)
-            testGray = cv2.circle(self.imageDebugGray.copy(), (dart.xOriginal, dart.yOriginal), 2, (255,0,0), -1)
+            #testGray = cv2.circle(self.imageDebugGray.copy(), (dart.xOriginal, dart.yOriginal), 2, (255,0,0), -1)
             cv2.namedWindow('Hit_point', cv2.WINDOW_NORMAL)
             cv2.resizeWindow('Hit_point', 1200,700)
             cv2.imshow("Hit_point", test)
-            cv2.imshow("Hit_point_Gray", testGray)
+            #cv2.imshow("Hit_point_Gray", testGray)
             cv2.waitKey(180) & 0xFF
 
 if __name__ == '__main__':
