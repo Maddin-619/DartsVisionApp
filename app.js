@@ -19,7 +19,7 @@ var app = express();
 var spawn = require('child_process').spawn,
     py    = spawn('python', ['DartVision/DartVision.py']);
 
-var hostname = 'martin-desktop';//os.hostname;
+var hostname = os.hostname;
 
 mongoose.Promise = global.Promise;
 
