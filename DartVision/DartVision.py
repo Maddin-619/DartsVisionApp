@@ -62,7 +62,7 @@ class DartVision:
         self.light(True)
         self.takePicture(1)
         self.getField()
-        self.connect('alarmpi')
+        self.connect('dartpi')
 
     def run(self):
         # Fork Process which listens to the commands form the Node.js UI
