@@ -59,7 +59,7 @@ class DartVision:
         self.light(True)
         self.takePicture(1)
         self.getField()
-        self.connect('martin-desktop')
+        self.connect('dartpi')
 
     def run(self):
         # Fork Process which listens to the commands form the Node.js UI
@@ -111,7 +111,7 @@ class DartVision:
         upper_red2 = np.array([180,255,255])
 
         lower_black = np.array([0,0,0])
-        upper_black = np.array([180,255,50])
+        upper_black = np.array([180,255,55])
 
         # Kernal
         kernel = np.ones((3,3),np.uint8)
