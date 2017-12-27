@@ -30,7 +30,6 @@ router.post('/', function(req, res, next) {
 
 /* PUT /players/:id */
 router.put('/:id', function(req, res, next) {
-  delete req.body._id;
   Player.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
