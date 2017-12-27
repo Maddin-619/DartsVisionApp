@@ -58,12 +58,12 @@ module.exports = function() {
             }
             players[index].round.splice(0,3);
             players[index].turn = false;
-            Player.update({ _id: players[index].id}, players[index], function (err, post) {
+            Player.collection.update({ _id: players[index].id}, players[index], function (err, post) {
               if (err) console.log(err);
             });
             nextPlayer(players);
             players[index].turn = true;
-            Player.update({ _id: players[index].id}, players[index], function (err, post) {
+            Player.collection.update({ _id: players[index].id}, players[index], function (err, post) {
               if (err) console.log(err);
             });
             global.channel.publish('amq.topic', 'score', new Buffer(JSON.stringify(players)));
@@ -112,7 +112,7 @@ module.exports = function() {
                 if (index == i) continue;
                 if (players[index].points == players[i].points) {
                   players[i].points = game.gamepoints;
-                  Player.update({ _id: players[i].id}, players[i], function (err, post) {
+                  Player.collection.update({ _id: players[i].id}, players[i], function (err, post) {
                     if (err) console.log(err);
                   });
                 }
@@ -136,7 +136,7 @@ module.exports = function() {
 
             nextDart();
             global.channel.publish('amq.topic', 'score', new Buffer(JSON.stringify(players)));
-            Player.update({ _id: players[index].id}, players[index], function (err, post) {
+            Player.collection.update({ _id: players[index].id}, players[index], function (err, post) {
               if (err) console.log(err);
             });
           }
