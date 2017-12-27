@@ -55,11 +55,13 @@ module.exports = function() {
             }
             players[index].round.splice(0,3);
             players[index].turn = false;
+            delete players[index]._id;
             Player.update({ _id: players[index].id}, players[index], function (err, post) {
               if (err) console.log(err);
             });
             nextPlayer(players);
             players[index].turn = true;
+            delete players[index]._id;
             Player.update({ _id: players[index].id}, players[index], function (err, post) {
               if (err) console.log(err);
             });
@@ -109,6 +111,7 @@ module.exports = function() {
                 if (index == i) continue;
                 if (players[index].points == players[i].points) {
                   players[i].points = game.gamepoints;
+                  delete players[i]._id;
                   Player.update({ _id: players[i].id}, players[i], function (err, post) {
                     if (err) console.log(err);
                   });
@@ -133,6 +136,7 @@ module.exports = function() {
 
             nextDart();
             global.channel.publish('amq.topic', 'score', new Buffer(JSON.stringify(players)));
+            delete players[index]._id;
             Player.update({ _id: players[index].id}, players[index], function (err, post) {
               if (err) console.log(err);
             });
