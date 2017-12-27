@@ -528,7 +528,7 @@ class DartVision:
 
     def connect(self, hostname):
         # Connect to the RabbitMQ Server 
-        self.amqpConnection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname))
+        self.amqpConnection = pika.BlockingConnection(pika.ConnectionParameters(host=hostname, heartbeat_interval=0))
         self.amqpChannel = self.amqpConnection.channel()
         self.amqpChannel.queue_declare(queue='points', durable=False)
         self.amqpChannel.queue_declare(queue='task', durable=False)
