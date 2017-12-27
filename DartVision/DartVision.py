@@ -115,7 +115,7 @@ class DartVision:
         upper_red2 = np.array([180,255,255])
 
         lower_black = np.array([0,0,0])
-        upper_black = np.array([180,255,50])
+        upper_black = np.array([180,255,60])
 
         # Kernal
         kernel = np.ones((3,3),np.uint8)
